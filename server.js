@@ -11,7 +11,7 @@ const cors =require("cors");//localhost3000（front)からlocalhost5000(backend)
 
 require("dotenv").config();//processを使うため（envファイルに書き込まれている環境変数の読み込み)
 
-const port = 5000;//ポート番号を指定
+const port = process.env.PORT||10000;//ポート番号を指定
 
 
 app.use(express.json());
