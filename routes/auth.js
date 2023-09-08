@@ -1,70 +1,60 @@
-const router = require("express").Router();//server.jsで使えるようになる。
-const { PrismaClient } = require("@prisma/client");//このパッケージを利用することでfindemanyなどが使えるようになる
-const bcrypt = require("bcrypt")//ハッシュ化するためのimpiort
-const jwt = require("jsonwebtoken"); //tokenを発行するために行うもの。tokenは、ログインできた後に発行されるもの
+const router = require("express").Router();
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const generateIdenticon = require("../utils/generateIdenticon");
 
+const prisma = new PrismaClient();
 
+//新規ユーザー登録API
+router.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
 
+  const defaultIconImage = generateIdenticon(email);
 
-const prisma = new PrismaClient();//インポートしたPrismaClientを実際にこのコードを書くことで使えるよ
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-
-
-router.post("/register",async(req,res)=>{
-  
-    const {username,email,password} = req.body; //reqのbodyはjson形式で送られたbody
-
-    const hashedPassword  = await bcrypt.hash(password,10);
-    
-    const defaultIconImage = generateIdenticon(email);
-    const user = await prisma.user.create({
-        data:{
-            username,
-            email,
-            password:hashedPassword,
-            profile:{
-                create:{
-                bio:"はじめまして",
-                profileImageUrl:defaultIconImage,
-                },
-            },
-            include:{
-                profile:true,
-            }
+  const user = await prisma.user.create({
+    data: {
+      username,
+      email,
+      password: hashedPassword,
+      profile: {
+        create: {
+          bio: "はじめまして",
+          profileImageUrl: defaultIconImage,
         },
-    }
-    );
-    return res.json({user});
+      },
+    },
+    include: {
+      profile: true,
+    },
+  });
 
-})
-
-//ユーザログイン
-router.post("/login",async(req,res)=>{
-   
-    const {email,password} = req.body;
-
-    const user = await prisma.user.findUnique({
-        where:{
-            email
-        }
-    });
-   
-    if(!user){
-       
-        return res.status(401).json({erorr:"メールアドレスかパスワードが間違っています。"});//userが居なかったらjsonでeror返す。
-    }
-
-    const isPasswordVaild = await bcrypt.compare(password,user.password);//password比較
-    if(!isPasswordVaild){
-     
-        return res.status(401).json({erorr:"パスワードが間違っています。"});
-        
-    }
-
-    const token = jwt.sign({id:user.id},process.env.SECRET_KEY,{expiresIn:"1d"});//1引数：どれをトークン化していくか、第２引数：秘密鍵（サーバ側が持っている）
-    //第３引数：有効期限　//SECRET_KEYは、盗まれ内容にenvファイルに書き込む
-    return res.json({token});
-
+  return res.json({ user });
 });
+
+//ユーザーログインAPI
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return res.status(401).json({ erorr: "そのユーザーは存在しません。" });
+  }
+
+  const isPasswordVaild = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordVaild) {
+    return res.status(401).json({ error: "そのパスワードは間違っています" });
+  }
+
+  const token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
+    expiresIn: "1d",
+  });
+
+  return res.json({ token });
+});
+
 module.exports = router;
