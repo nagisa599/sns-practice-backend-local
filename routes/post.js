@@ -9,9 +9,9 @@ const prisma = new PrismaClient();
 //投稿用api
 router.post("/post", isAuthenticated, async (req, res) => {
   const { content } = req.body; 
-  console.log(content);
+  //console.log(content);
   if (!content) {//もし投稿内容がなかったら
-    console.log(req.userId);
+    //console.log(req.userId);
     return res.status(400).json({ message: "投稿内容がありません" });
   }
  
@@ -82,4 +82,4 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router

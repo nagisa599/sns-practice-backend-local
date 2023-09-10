@@ -10,11 +10,11 @@ const prisma = new PrismaClient();
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
 
-  const defaultIconImage = generateIdenticon(email);
+  const defaultIconImage = generateIdenticon(email);//アイコンを表示
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);//hash化する。
 
-  const user = await prisma.user.create({
+  const user = await prisma.user.create({//dataを挿入する
     data: {
       username,
       email,
@@ -26,9 +26,9 @@ router.post("/register", async (req, res) => {
         },
       },
     },
-    include: {
-      profile: true,
-    },
+    // include: {//profileは、一応外にあるためtrueじゃないと使えない
+    //   profile: true,
+    // },
   });
 
   return res.json({ user });

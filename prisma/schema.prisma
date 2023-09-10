@@ -12,16 +12,16 @@ model Post {
   content   String
   createdAt DateTime @default(now())
   authorId  Int
-  author      User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id]) //fieldが外部キー、referenceが外部キー先
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String
-  email    String @unique
+  id       Int    @id @default(autoincrement())//＠id->主キー
+  username String 
+  email    String @unique //ダブりはだめ
   password String
   Post     Post[] 
-  profile  Profile?
+  profile  Profile? 
 }
 
 model Profile {
@@ -29,5 +29,5 @@ model Profile {
   bio String? 
   profileImageUrl String?
   userId Int @unique
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])//userIdが外部キー、refrenceは外部キー先
 }

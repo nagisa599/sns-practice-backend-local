@@ -4,17 +4,17 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 
 const prisma = new PrismaClient();
 
-router.get("/find", isAuthenticated, async (req, res) => {
+router.get("/find", isAuthenticated, async (req, res) => {//middlewareのisAuthneticatedを使うことでtokenがあるか確認する。なければ実行されない
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.userId } });
-    console.log(user);
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });//idからuserを検索
+    //console.log(user);
 
     if (!user) {
       res.status(404).json({ error: "ユーザーが見つかりませんでした。" });
     }
 
     res.status(200).json({
-      user: { id: user.id, email: user.email, username: user.username },
+      user: { id: user.id, email: user.email, username: user.username },//成功したらuser情報を返す
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
